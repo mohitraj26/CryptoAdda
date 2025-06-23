@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect } from "react";
-import { Area, AreaChart, CartesianGrid, XAxis, Tooltip } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
 import {
   Card,
@@ -97,7 +97,7 @@ export function ChartAreaInteractive({ coinId }: { coinId: string }) {
     <Card className="pt-0">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Cryptocurrency Price Chart</CardTitle>
+          <CardTitle>Price Chart</CardTitle>
           <CardDescription>
             Showing price data for the selected period
           </CardDescription>
@@ -142,6 +142,12 @@ export function ChartAreaInteractive({ coinId }: { coinId: string }) {
                 />
               </linearGradient>
             </defs>
+            <YAxis
+              domain={["dataMin", "dataMax"]}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `$${value.toLocaleString()}`}
+            />
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
