@@ -58,8 +58,7 @@ const CoinDetail: React.FC = () => {
             sparkline: false,
           },
         });
-        setCoin(res.data);
-        console.log(res.data);
+        setCoin(res.data as detailCoin);
       } catch (err) {
         console.error("Failed to fetch coin:", err);
       } finally {

@@ -50,13 +50,12 @@ fetchthreeMonthData: async (coinId: string) => {
       },
     });
 
-    const formatted = response.data.prices.map(
-      ([timestamp, price]: [number, number]) => ({
-        // date: new Date(timestamp).toLocaleDateString(),
-        date: new Date(timestamp).toLocaleDateString("en-GB"),
-        price,
-      })
-    );
+    // Type assertion for the specific property you need
+    const prices = (response.data as { prices: [number, number][] }).prices;
+    const formatted: DataPoint[] = prices.map(([timestamp, price]) => ({
+      date: new Date(timestamp).toLocaleDateString("en-GB"),
+      price,
+    }));
 
     // set({ threeMonthData: formatted });
 
