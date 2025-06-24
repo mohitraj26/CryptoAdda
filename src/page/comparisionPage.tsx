@@ -21,7 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { axiosInstance } from "../lib/axios";
-import { ChartLineDefault } from "@/components/graph";
+import { ChartLineDefault } from "../components/lineChart";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 
 // Skeleton component for loading state
@@ -108,7 +108,7 @@ const Comparision: React.FC = () => {
         Comparing {coin1.name} vs {coin2.name}
       </h2>
 
-          <Breadcrumb className="mb-6 max-w-5xl px-6">
+          <Breadcrumb className="mb-6 max-w-5xl px-6 sm: mt-5">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/">Markets</BreadcrumbLink>

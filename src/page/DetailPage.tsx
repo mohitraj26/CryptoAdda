@@ -14,7 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChartAreaInteractive } from "../components/lineChart";
+import { ChartAreaInteractive } from "../components/AreaChart";
 import { Badge } from "@/components/ui/badge";
 
 
