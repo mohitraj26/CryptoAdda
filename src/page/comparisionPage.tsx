@@ -1,339 +1,3 @@
-// "use client"
-
-// import Navbar from "@/components/navbar";
-// import { useParams } from "react-router-dom";
-// import { Separator } from "@radix-ui/react-dropdown-menu";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import { Skeleton } from "@/components/ui/skeleton";
-// import { useState, useEffect } from "react";
-// import { axiosInstance } from "../lib/axios";
-
-// // Skeleton component for loading state
-// const TableRowSkeleton = () => (
-//   <TableRow>
-//     <TableCell className="py-4 px-6">
-//       <Skeleton className="h-4 w-8" />
-//     </TableCell>
-//     <TableCell className="py-4 px-6">
-//       <div className="flex items-center gap-2">
-//         <Skeleton className="w-6 h-6 rounded-full" />
-//         <Skeleton className="h-4 w-24" />
-//       </div>
-//     </TableCell>
-//     <TableCell className="py-4 px-6">
-//       <Skeleton className="h-4 w-20" />
-//     </TableCell>
-//     <TableCell className="py-4 px-6">
-//       <Skeleton className="h-4 w-16" />
-//     </TableCell>
-//     <TableCell className="py-4 px-6">
-//       <Skeleton className="h-4 w-28" />
-//     </TableCell>
-//     <TableCell className="py-4 px-6">
-//       <Skeleton className="h-4 w-20" />
-//     </TableCell>
-//   </TableRow>
-// );
-
-// const Comparision: React.FC = () => {
-//       const [loading, setLoading] = useState(true);
-//       const { coin1Id, coin2Id } = useParams();
-
-//       useEffect(() => {
-//         const fetchCoin = async () => {
-//           try {
-//             const res = await axiosInstance.get(`/coins/${id}`, {
-//               params: {
-//                 localization: false,
-//                 tickers: false,
-//                 market_data: true,
-//                 community_data: false,
-//                 developer_data: false,
-//                 sparkline: false,
-//               },
-//             });
-//             setCoin(res.data);
-//             console.log(res.data);
-//           } catch (err) {
-//             console.error("Failed to fetch coin:", err);
-//           } finally {
-//             setLoading(false);
-//           }
-//         };
-
-//         fetchCoin();
-//       }, [id]);
-
-//       if (loading) return <p>Loading...</p>;
-//       if (!coin) return <p>Coin not found.</p>;
-
-//     return (
-//         <>
-//         <div className="flex flex-col items-center w-full px-4">
-//             <Navbar />
-//         </div>
-
-//         <Separator className="h-[2px] bg-border shadow-sm shadow-white/30 w-full" />
-
-//               {/* Table */}
-//       <Table>
-//         <TableHeader>
-//           <TableRow>
-//             <TableHead className="w-[100px] text-base py-4 px-6">#</TableHead>
-//             <TableHead className="text-base py-4 px-6">Coin</TableHead>
-//             <TableHead className="text-base py-4 px-6">Price</TableHead>
-//             <TableHead className="text-base py-4 px-6">24h%</TableHead>
-//             <TableHead className="text-base py-4 px-6">Market Cap</TableHead>
-//             <TableHead className="text-base py-4 px-6"></TableHead>
-//           </TableRow>
-//         </TableHeader>
-
-//         <TableBody>
-
-//         </TableBody>
-//       </Table>
-//         <div>
-//       <h1>Comparing {coin1Id} vs {coin2Id}</h1>
-//       {/* Fetch and show details for both coins */}
-//     </div>
-//     </>
-
-//     );
-// }
-
-// export default Comparision
-
-// "use client";
-
-// import Navbar from "@/components/navbar";
-// import { useParams } from "react-router-dom";
-// import { Separator } from "@radix-ui/react-dropdown-menu";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import { Skeleton } from "@/components/ui/skeleton";
-// import { useState, useEffect } from "react";
-// import { axiosInstance } from "../lib/axios";
-// // import { ChartAreaInteractive } from "@/components/lineChart";
-// import { ChartLineDefault } from "@/components/graph";
-
-// // Skeleton component
-// const TableRowSkeleton = () => (
-//   <TableRow>
-//     {[...Array(2)].map((_, i) => (
-//       <TableCell key={i} className="py-4 px-6">
-//         <Skeleton className="h-4 w-full" />
-//       </TableCell>
-//     ))}
-//   </TableRow>
-// );
-
-// const Comparision: React.FC = () => {
-//   const { coin1Id, coin2Id } = useParams();
-//   const [coin1, setCoin1] = useState<any>(null);
-//   const [coin2, setCoin2] = useState<any>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchCoins = async () => {
-//       try {
-//         const [res1, res2] = await Promise.all([
-//           axiosInstance.get(`/coins/${coin1Id}`, {
-//             params: {
-//               localization: false,
-//               tickers: false,
-//               market_data: true,
-//               community_data: false,
-//               developer_data: false,
-//               sparkline: false,
-//             },
-//           }),
-//           axiosInstance.get(`/coins/${coin2Id}`, {
-//             params: {
-//               localization: false,
-//               tickers: false,
-//               market_data: true,
-//               community_data: false,
-//               developer_data: false,
-//               sparkline: false,
-//             },
-//           }),
-//         ]);
-//         setCoin1(res1.data);
-//         console.log(res1.data);
-//         setCoin2(res2.data);
-//         console.log(res2.data);
-//       } catch (err) {
-//         console.error("Failed to fetch coin data:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCoins();
-//   }, [coin1Id, coin2Id]);
-
-//   if (loading)
-//     return (
-//       <Table>
-//         <TableBody>
-//           <TableRowSkeleton />
-//         </TableBody>
-//       </Table>
-//     );
-
-//   if (!coin1 || !coin2) return <p>One or both coins not found.</p>;
-
-//   return (
-//     <>
-//       <div className="flex flex-col items-center w-full px-4">
-//         <Navbar />
-//       </div>
-
-//       <Separator className="h-[2px] bg-border shadow-sm shadow-white/30 w-full" />
-
-//       <div className="mt-6 text-xl font-semibold text-center">
-//         Comparing {coin1.name} vs {coin2.name}
-//       </div>
-
-//       {/* Table */}
-//       <Table className="mt-6">
-//         <TableHeader>
-//           <TableRow>
-//             <TableHead className="text-base py-4 px-6">Asset</TableHead>
-//             <TableHead className="text-base py-4 px-6">Price</TableHead>
-//             <TableHead className="text-base py-4 px-6">24h%</TableHead>
-//             <TableHead className="text-base py-4 px-6">Market Cap</TableHead>
-//             <TableHead className="text-base py-4 px-6">Volume</TableHead>
-//             <TableHead className="text-base py-4 px-6">
-//               Circulating Supply
-//             </TableHead>
-//             <TableHead className="text-base py-4 px-6">Total Supply</TableHead>
-//           </TableRow>
-//         </TableHeader>
-//         <TableBody>
-//           {[coin1, coin2].map((coin) => (
-//             <TableRow key={coin.id}>
-//               <TableCell className="py-4 px-6 flex items-center gap-2">
-//                 <img
-//                   src={coin.image.small}
-//                   alt={coin.name}
-//                   className="w-6 h-6"
-//                 />
-//                 {coin.name}
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 ${coin.market_data.current_price.usd.toLocaleString()}
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 {coin.market_data.price_change_percentage_24h.toFixed(2)}%
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 ${coin.market_data.market_cap.usd.toLocaleString()}
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 ${coin.market_data.total_volume.usd.toLocaleString()}
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 ${coin.market_data.circulating_supply.toLocaleString()}
-//               </TableCell>
-//               <TableCell className="py-4 px-6">
-//                 ${coin.market_data.total_supply.toLocaleString()}
-//               </TableCell>
-//             </TableRow>
-//           ))}
-//         </TableBody>
-//       </Table>
-
-//       <div className="flex mt-5">
-
-//       <div>
-//         <div className="flex items-center ml-70 gap-4">
-//           <img src={coin1.image.large} alt={coin1.name} className="w-10 h-10" />
-//           <h1 className="text-2xl font-semibold">
-//             {coin1.name} ({coin1.symbol.toUpperCase()})
-//           </h1>
-//         </div>
-
-//         <div>
-//           <div className=" ml-75 mt-2 items-center">
-//             <p className="mb-2 text-gray-500">7D</p>
-//             <p className="text-xl font-bold">
-//               ${coin1.market_data.current_price.usd.toLocaleString()}
-//             </p>
-//             <div className="flex  items-center gap-2">
-//               <p className="text-sm text-gray-500">Last 7 Days</p>
-//               <p
-//                 className={`text-base  ${
-//                   coin1.market_data.price_change_percentage_7d < 0
-//                     ? "text-red-500"
-//                     : "text-green-500"
-//                 }`}
-//               >
-//                 {coin1.market_data.price_change_percentage_7d}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div>
-//         <div className="flex items-center ml-70 gap-4">
-//           <img src={coin2.image.large} alt={coin2.name} className="w-10 h-10" />
-//           <h1 className="text-2xl font-semibold">
-//             {coin2.name} ({coin2.symbol.toUpperCase()})
-//           </h1>
-//         </div>
-
-//         <div>
-//           <div className=" ml-75 mt-2 items-center">
-//             <p className="mb-2 text-gray-500">7D</p>
-//             <p className="text-xl font-bold">
-//               ${coin2.market_data.current_price.usd.toLocaleString()}
-//             </p>
-//             <div className="flex  items-center gap-2">
-//               <p className="text-sm text-gray-500">Last 7 Days</p>
-//               <p
-//                 className={`text-base  ${
-//                   coin2.market_data.price_change_percentage_7d < 0
-//                     ? "text-red-500"
-//                     : "text-green-500"
-//                 }`}
-//               >
-//                 {coin2.market_data.price_change_percentage_7d}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-
-//       </div>
-
-//       <div className="px-4 lg:px-6 mt-5 gap-50 flex w-full justify-center">
-//         <ChartLineDefault coinId={coin1.id} />
-//         <ChartLineDefault coinId={coin2.id} />
-//       </div>
-//     </>
-//   );
-// };
-
-// export default Comparision;
-
-
-
 "use client";
 
 import Navbar from "@/components/navbar";
@@ -346,10 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { axiosInstance } from "../lib/axios";
 import { ChartLineDefault } from "@/components/graph";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 
 // Skeleton component for loading state
 const TableRowSkeleton = () => (
@@ -429,11 +102,23 @@ const Comparision: React.FC = () => {
         <Navbar />
       </div>
 
-      {/* <Separator className="h-[2px] bg-border shadow-sm shadow-white/30 w-full my-4" /> */}
+      <Separator className="h-[2px] bg-border shadow-sm shadow-white/30 w-full my-4" />
 
       <h2 className="mt-4 text-center text-2xl sm:text-3xl font-semibold">
         Comparing {coin1.name} vs {coin2.name}
       </h2>
+
+          <Breadcrumb className="mb-6 max-w-5xl px-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Markets</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{coin1.name} vs {coin2.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
       {/* Responsive Table Wrapper */}
       <div className="overflow-x-auto mt-6 px-2 sm:px-0">
@@ -495,43 +180,43 @@ const Comparision: React.FC = () => {
         </Table>
       </div>
 
-      {/* Coin Summary Sections */}
-      <div className="flex flex-col sm:flex-row justify-center gap-8 mt-8 px-4 sm:px-6 lg:px-8">
-        {[coin1, coin2].map((coin) => (
-          <div
-            key={coin.id}
-            className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 w-full max-w-sm"
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <img
-                src={coin.image.large}
-                alt={coin.name}
-                className="w-12 h-12 rounded-full"
-                loading="lazy"
-              />
-              <h3 className="text-xl font-semibold">
-                {coin.name} ({coin.symbol.toUpperCase()})
-              </h3>
+        {/* Coin Summary Sections */}
+        <div className="flex flex-col sm:flex-row justify-center gap-8 mt-8 px-4 sm:px-6 lg:px-8">
+          {[coin1, coin2].map((coin) => (
+            <div
+              key={coin.id}
+              className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 w-full max-w-sm"
+            >
+              <div className="flex items-center gap-4 mb-3">
+                <img
+                  src={coin.image.large}
+                  alt={coin.name}
+                  className="w-12 h-12 rounded-full"
+                  loading="lazy"
+                />
+                <h3 className="text-xl font-semibold">
+                  {coin.name} ({coin.symbol.toUpperCase()})
+                </h3>
+              </div>
+              <div className="text-center">
+                
+                <p className="text-2xl font-bold mb-2">
+                  ${coin.market_data.current_price.usd.toLocaleString()}
+                </p>
+                <p
+                  className={`text-lg font-semibold ${
+                    coin.market_data.price_change_percentage_7d < 0
+                      ? "text-red-600"
+                      : "text-green-600"
+                  }`}
+                >
+                  <span className="text-gray-500 mb-1 block">Past 7 Days</span>
+                  {coin.market_data.price_change_percentage_7d.toFixed(2)}%
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              
-              <p className="text-2xl font-bold mb-2">
-                ${coin.market_data.current_price.usd.toLocaleString()}
-              </p>
-              <p
-                className={`text-lg font-semibold ${
-                  coin.market_data.price_change_percentage_7d < 0
-                    ? "text-red-600"
-                    : "text-green-600"
-                }`}
-              >
-                <p className="text-gray-500 mb-1">Past 7 Days</p>
-                {coin.market_data.price_change_percentage_7d.toFixed(2)}%
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
       {/* Responsive Charts */}
       <div className="flex flex-col sm:flex-row  justify-center gap-6 mt-8 px-4 sm:px-6 lg:px-8">

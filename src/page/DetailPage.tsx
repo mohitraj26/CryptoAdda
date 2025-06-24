@@ -35,6 +35,16 @@ const CoinDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
 
+
+    // Check if coin is already bookmarked
+  useEffect(() => {
+    const stored = localStorage.getItem("bookmarkedCoins");
+    if (stored) {
+      const bookmarks: string[] = JSON.parse(stored);
+      setBookmarked(bookmarks.includes(id!));
+    }
+  }, [id]);
+
   useEffect(() => {
     const fetchCoin = async () => {
       try {
@@ -59,6 +69,24 @@ const CoinDetail: React.FC = () => {
 
     fetchCoin();
   }, [id]);
+
+
+
+  const toggleBookmark = () => {
+    const stored = localStorage.getItem("bookmarkedCoins");
+    const bookmarks: string[] = stored ? JSON.parse(stored) : [];
+
+    let updated: string[];
+    if (bookmarks.includes(id!)) {
+      updated = bookmarks.filter((coinId) => coinId !== id);
+      setBookmarked(false);
+    } else {
+      updated = [...bookmarks, id!];
+      setBookmarked(true);
+    }
+
+    localStorage.setItem("bookmarkedCoins", JSON.stringify(updated));
+  };
 
   if (loading) return <p>Loading...</p>;
   if (!coin) return <p>Coin not found.</p>;
@@ -102,7 +130,7 @@ const CoinDetail: React.FC = () => {
             hover:bg-yellow-100 hover:text-yellow-900 dark:hover:bg-yellow-300
             font-semibold rounded-lg px-6 py-2
           `}
-            onClick={() => setBookmarked((prev) => !prev)}
+            onClick={toggleBookmark}
             aria-pressed={bookmarked}
             aria-label={bookmarked ? "Remove bookmark" : "Add bookmark"}
           >
@@ -137,7 +165,7 @@ const CoinDetail: React.FC = () => {
 
         </div>
 
-        <div className="px-4 lg:px-6 mt-8">
+        <div className="px-4 lg:px-6 mt-10">
           <ChartAreaInteractive coinId={coin.id} />
         </div>
 

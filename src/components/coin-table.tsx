@@ -22,11 +22,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
-
-const ITEMS_PER_PAGE = 7;
-
-
 import {
   Select,
   SelectContent,
@@ -34,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   Dialog,
   DialogContent,
@@ -42,10 +36,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
+const ITEMS_PER_PAGE = 7;
 
-// Skeleton component for loading state
+// Skeleton loader row
 const TableRowSkeleton = () => (
   <TableRow>
     <TableCell className="py-4 px-6">
@@ -72,30 +67,6 @@ const TableRowSkeleton = () => (
   </TableRow>
 );
 
-
-
-const CoinTable: React.FC = () => {
-  const { coins, loading, fetchCoins } = useCoinStore();
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
-  const [coin1, setCoin1] = useState("");;
-  const [coin2, setCoin2] = useState("");;
-
-
-
-  const toggleBookmark = (id : string) => {
-  setBookmarkedIds((prev) => {
-    const updated = new Set(prev);
-    if (updated.has(id)) {
-      updated.delete(id);
-    } else {
-      updated.add(id);
-    }
-    return updated;
-  });
-};
-
 type Coin = {
   id: string;
   name: string;
@@ -106,6 +77,7 @@ type CoinSelectProps = {
   value: string;
   onChange: (value: string) => void;
 };
+
 const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
   return (
     <Select value={value} onValueChange={onChange}>
@@ -123,6 +95,40 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
   );
 };
 
+const CoinTable: React.FC = () => {
+  const { coins, loading, fetchCoins } = useCoinStore();
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [coin1, setCoin1] = useState("");
+  const [coin2, setCoin2] = useState("");
+
+  // Load bookmarks from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("bookmarkedCoins");
+    if (stored) {
+      setBookmarkedIds(new Set(JSON.parse(stored)));
+    }
+  }, []);
+
+  // Save bookmarks to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem("bookmarkedCoins", JSON.stringify(Array.from(bookmarkedIds)));
+  }, [bookmarkedIds]);
+
+  const toggleBookmark = (id: string) => {
+    setBookmarkedIds((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(id)) {
+        updated.delete(id);
+      } else {
+        updated.add(id);
+      }
+
+      
+      return updated;
+    });
+  };
 
   useEffect(() => {
     fetchCoins(); // Fetch once on mount
@@ -140,7 +146,7 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
 
   return (
     <>
-      {/* Search bar */}
+      {/* Search + Comparison */}
       <div className="w-full max-w-5xl relative mb-5 flex gap-4">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -156,43 +162,51 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
         />
 
         <Dialog>
-            <DialogTrigger asChild>
-            <Button variant="default">Comparison</Button>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="cursor-pointer">Comparison</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Compare your favorite coins side by side!</DialogTitle>
               <DialogDescription>
-                  Dive into the key differences between your selected cryptocurrencies — from their purpose and technology to their unique features.
+                Dive into the key differences between your selected cryptocurrencies — from their purpose and technology to their unique features.
               </DialogDescription>
             </DialogHeader>
-<div className="flex flex-col items-center">
-  <div className="flex flex-col justify-center items-center gap-4 mt-4">
-    <CoinSelect
-      coins={coins.filter((coin) => coin.id !== coin2)} // exclude coin2
-      value={coin1}
-      onChange={(value) => setCoin1(value)}
-    />
-    <CoinSelect
-      coins={coins.filter((coin) => coin.id !== coin1)} // exclude coin1
-      value={coin2}
-      onChange={(value) => setCoin2(value)}
-    />
-  </div>
+            <div className="flex flex-col items-center">
+              <div className="flex flex-col justify-center items-center gap-4 mt-4">
+                <CoinSelect
+                  coins={coins.filter((coin) => coin.id !== coin2)}
+                  value={coin1}
+                  onChange={(value) => setCoin1(value)}
+                />
+                <CoinSelect
+                  coins={coins.filter((coin) => coin.id !== coin1)}
+                  value={coin2}
+                  onChange={(value) => setCoin2(value)}
+                />
+              </div>
 
-  {coin1 && coin2 ? (
-    <Link to={`/compare/${coin1}/${coin2}`}>
-      <Button className="mt-4 w-fit">Compare</Button>
-    </Link>
-  ) : (
-    <Button className="mt-4 w-fit" disabled>
-      Select both coins to compare
-    </Button>
-  )}
-</div>
-
+              {coin1 && coin2 ? (
+                <Link to={`/compare/${coin1}/${coin2}`}>
+                  <Button className="mt-4 w-fit">Compare</Button>
+                </Link>
+              ) : (
+                <Button className="mt-4 w-fit" disabled>
+                  Select both coins to compare
+                </Button>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
+
+        <Link to={`/watchlist`}>
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+          >Watchlist</Button>
+        </Link>
+          
+        
       </div>
 
       {/* Table */}
@@ -210,12 +224,9 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
 
         <TableBody>
           {loading ? (
-            // Show skeleton rows while loading
-            <>
-              {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
-                <TableRowSkeleton key={index} />
-              ))}
-            </>
+            Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+              <TableRowSkeleton key={index} />
+            ))
           ) : paginatedCoins.length > 0 ? (
             paginatedCoins.map((coin, index) => (
               <TableRow key={coin.id}>
@@ -224,9 +235,7 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
                 </TableCell>
                 <TableCell className="flex items-center gap-2 text-base py-4 px-6">
                   <img src={coin.image} alt={coin.name} className="w-6 h-6" />
-                  <Link to={`/coin/${coin.id}`}>
-                  {coin.name}
-                  </Link>
+                  <Link to={`/coin/${coin.id}`}>{coin.name}</Link>
                 </TableCell>
                 <TableCell className="text-base py-4 px-6">
                   ${coin.current_price.toLocaleString()}
@@ -267,7 +276,6 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
                     );
                   })()}
                 </TableCell>
-
               </TableRow>
             ))
           ) : (
@@ -278,7 +286,7 @@ const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
         </TableBody>
       </Table>
 
-      {/* Pagination - hidden while loading */}
+      {/* Pagination */}
       {!loading && totalPages > 1 && (
         <div className="mt-5">
           <Pagination>
