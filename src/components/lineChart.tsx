@@ -35,13 +35,22 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-// Helper function to parse date from DD/MM/YYYY format
-const parseDate = (dateStr: string) => {
-  const [day, month, year] = dateStr.split("/").map(Number);
+// Updated parseDate function with proper type checking
+const parseDate = (dateStr: string | undefined | null): Date => {
+  // Return current date as fallback
+  if (!dateStr) return new Date();
+  
+  const parts = dateStr.split("/");
+  // Ensure we have exactly 3 parts (day, month, year)
+  if (parts.length !== 3) return new Date();
+  
+  const [day, month, year] = parts.map(Number);
+  // Basic validation for date parts
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return new Date();
+  
   return new Date(year, month - 1, day);
 };
 
-// Custom tooltip component
 const CustomTooltip = ({
   active,
   payload,
@@ -51,8 +60,12 @@ const CustomTooltip = ({
   payload?: any[];
   label?: string;
 }) => {
-  if (active && payload && payload.length) {
-    const formattedDate = parseDate(label!).toLocaleDateString("en-US", {
+  if (!active || !payload || payload.length === 0 || !label) {
+    return null;
+  }
+
+  try {
+    const formattedDate = parseDate(label).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -66,38 +79,60 @@ const CustomTooltip = ({
         <div className="font-semibold">{formattedValue}</div>
       </div>
     );
+  } catch (error) {
+    console.error("Error rendering tooltip:", error);
+    return null;
   }
-
-  return null;
 };
 
 export function ChartAreaInteractive({ coinId }: { coinId: string }) {
   const [timeRange, setTimeRange] = React.useState("90d");
-  const { threeMonthData, fetchthreeMonthData } = useCoinStore();
+  const { coinData, fetchthreeMonthData } = useCoinStore();
 
   useEffect(() => {
     fetchthreeMonthData(coinId);
-  }, []);
+  }, [coinId, fetchthreeMonthData]);
+  const data = coinData[coinId] || [];
+  console.log("Three month data:", coinData);
 
-  const filteredData = threeMonthData.filter((item) => {
-    const date = parseDate(item.date);
-    const referenceDate = new Date();
-    let daysToSubtract = 90;
-    if (timeRange === "30d") {
-      daysToSubtract = 30;
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7;
+const filteredData = data
+  .filter((item) => {
+    // Skip items with invalid dates
+    if (!item.date) return false;
+    
+    try {
+      const date = parseDate(item.date);
+      const referenceDate = new Date();
+      let daysToSubtract = 90;
+      
+      if (timeRange === "30d") {
+        daysToSubtract = 30;
+      } else if (timeRange === "7d") {
+        daysToSubtract = 7;
+      }
+      
+      const startDate = new Date(referenceDate);
+      startDate.setDate(startDate.getDate() - daysToSubtract);
+      return date >= startDate;
+    } catch {
+      return false;
     }
-    const startDate = new Date(referenceDate);
-    startDate.setDate(startDate.getDate() - daysToSubtract);
-    return date >= startDate;
+  })
+  // Ensure data is sorted by date
+  .sort((a, b) => {
+    try {
+      return parseDate(a.date).getTime() - parseDate(b.date).getTime();
+    } catch {
+      return 0;
+    }
   });
+
 
   return (
     <Card className="pt-0">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Price Chart</CardTitle>
+          <CardTitle> {coinId.toUpperCase()}</CardTitle>
           <CardDescription>
             Showing price data for the selected period
           </CardDescription>
@@ -156,11 +191,15 @@ export function ChartAreaInteractive({ coinId }: { coinId: string }) {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = parseDate(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
+                try {
+                  const date = parseDate(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                } catch {
+                  return "";
+                }
               }}
             />
             <Tooltip content={<CustomTooltip />} />

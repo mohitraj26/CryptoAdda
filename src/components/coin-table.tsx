@@ -21,8 +21,29 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
-const ITEMS_PER_PAGE = 10;
+
+const ITEMS_PER_PAGE = 7;
+
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 
 // Skeleton component for loading state
 const TableRowSkeleton = () => (
@@ -51,10 +72,57 @@ const TableRowSkeleton = () => (
   </TableRow>
 );
 
+
+
 const CoinTable: React.FC = () => {
   const { coins, loading, fetchCoins } = useCoinStore();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
+  const [coin1, setCoin1] = useState("");;
+  const [coin2, setCoin2] = useState("");;
+
+
+
+  const toggleBookmark = (id : string) => {
+  setBookmarkedIds((prev) => {
+    const updated = new Set(prev);
+    if (updated.has(id)) {
+      updated.delete(id);
+    } else {
+      updated.add(id);
+    }
+    return updated;
+  });
+};
+
+type Coin = {
+  id: string;
+  name: string;
+};
+
+type CoinSelectProps = {
+  coins: Coin[];
+  value: string;
+  onChange: (value: string) => void;
+};
+const CoinSelect = ({ coins, value, onChange }: CoinSelectProps) => {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-[250px]">
+        <SelectValue placeholder="Select a coin" />
+      </SelectTrigger>
+      <SelectContent>
+        {coins.map((coin) => (
+          <SelectItem key={coin.id} value={coin.id}>
+            {coin.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
+
 
   useEffect(() => {
     fetchCoins(); // Fetch once on mount
@@ -73,7 +141,7 @@ const CoinTable: React.FC = () => {
   return (
     <>
       {/* Search bar */}
-      <div className="w-full max-w-5xl relative">
+      <div className="w-full max-w-5xl relative mb-5 flex gap-4">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
@@ -86,6 +154,45 @@ const CoinTable: React.FC = () => {
           }}
           disabled={loading}
         />
+
+        <Dialog>
+            <DialogTrigger asChild>
+            <Button variant="default">Comparison</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Compare your favorite coins side by side!</DialogTitle>
+              <DialogDescription>
+                  Dive into the key differences between your selected cryptocurrencies — from their purpose and technology to their unique features.
+              </DialogDescription>
+            </DialogHeader>
+<div className="flex flex-col items-center">
+  <div className="flex flex-col justify-center items-center gap-4 mt-4">
+    <CoinSelect
+      coins={coins.filter((coin) => coin.id !== coin2)} // exclude coin2
+      value={coin1}
+      onChange={(value) => setCoin1(value)}
+    />
+    <CoinSelect
+      coins={coins.filter((coin) => coin.id !== coin1)} // exclude coin1
+      value={coin2}
+      onChange={(value) => setCoin2(value)}
+    />
+  </div>
+
+  {coin1 && coin2 ? (
+    <Link to={`/compare/${coin1}/${coin2}`}>
+      <Button className="mt-4 w-fit">Compare</Button>
+    </Link>
+  ) : (
+    <Button className="mt-4 w-fit" disabled>
+      Select both coins to compare
+    </Button>
+  )}
+</div>
+
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Table */}
@@ -135,8 +242,32 @@ const CoinTable: React.FC = () => {
                   ${coin.market_cap.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-base py-4 px-6">
-                  <button className="text-blue-600 hover:underline">Bookmark</button>
+                  {(() => {
+                    const isBookmarked = bookmarkedIds.has(coin.id);
+                    return (
+                      <Button
+                        variant={isBookmarked ? "secondary" : "outline"}
+                        className={`
+                          transition-colors duration-200
+                          ${
+                            isBookmarked
+                              ? "bg-yellow-200 text-yellow-900 dark:bg-yellow-400 dark:text-yellow-900"
+                              : ""
+                          }
+                          border-yellow-400
+                          hover:bg-yellow-100 hover:text-yellow-900 dark:hover:bg-yellow-300
+                          font-semibold rounded-lg px-6 py-2
+                        `}
+                        onClick={() => toggleBookmark(coin.id)}
+                        aria-pressed={isBookmarked}
+                        aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                      >
+                        {isBookmarked ? "Bookmarked" : "Bookmark"}
+                      </Button>
+                    );
+                  })()}
                 </TableCell>
+
               </TableRow>
             ))
           ) : (
@@ -149,7 +280,7 @@ const CoinTable: React.FC = () => {
 
       {/* Pagination - hidden while loading */}
       {!loading && totalPages > 1 && (
-        <div className="mt-1">
+        <div className="mt-5">
           <Pagination>
             <PaginationContent>
               <PaginationItem>

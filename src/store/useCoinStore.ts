@@ -8,12 +8,15 @@ interface CoinStore {
   threeMonthData: { date: string; price: number }[];
   fetchCoins: () => Promise<void>
   fetchthreeMonthData: (coinId: string) => Promise<void>;
+  coinData: Record<string, DataPoint[]>;
 }
+type DataPoint = { date: string; price: number };
 
-export const useCoinStore = create<CoinStore>((set) => ({
+export const useCoinStore = create<CoinStore>((set,get) => ({
   coins: [],
   loading: false,
   threeMonthData: [],
+  coinData: {},
 
   fetchCoins: async () => {
     set({ loading: true });
@@ -38,6 +41,7 @@ export const useCoinStore = create<CoinStore>((set) => ({
 
 fetchthreeMonthData: async (coinId: string) => {
   try {
+     if (get().coinData[coinId]) return;
     const response = await axiosInstance.get(`/coins/${coinId}/market_chart`, {
       params: {
         vs_currency: "usd",
@@ -48,12 +52,20 @@ fetchthreeMonthData: async (coinId: string) => {
 
     const formatted = response.data.prices.map(
       ([timestamp, price]: [number, number]) => ({
-        date: new Date(timestamp).toLocaleDateString(),
+        // date: new Date(timestamp).toLocaleDateString(),
+        date: new Date(timestamp).toLocaleDateString("en-GB"),
         price,
       })
     );
 
-    set({ threeMonthData: formatted });
+    // set({ threeMonthData: formatted });
+
+      set((state) => ({
+        coinData: {
+          ...state.coinData,
+          [coinId]: formatted,
+        },
+      }));
   } catch (error) {
     console.error("Error fetching price data:", error);
   }

@@ -10,7 +10,7 @@ const LandingPage: React.FC = () => {
 
       <Separator className="h-[2px] bg-border shadow-sm shadow-white/30 w-full" />
 
-      <div className="mt-2 max-w-5xl w-full">
+      <div className="mt-5 max-w-5xl w-full">
         <CoinTable />
       </div>
     </div>

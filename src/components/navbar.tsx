@@ -13,6 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+
+
+
+
+
 const Navbar: React.FC = () => {
   return (
     <nav className="w-full bg-white text-black dark:bg-black dark:text-white shadow-md transition-colors">
@@ -28,6 +33,7 @@ const Navbar: React.FC = () => {
 
         {/* Theme Toggle + Profile */}
         <div className="flex items-center justify-end gap-4">
+
           {/* Theme Toggle */}
           <ModeToggle />
 
