@@ -6,8 +6,11 @@ import CoinDetail from "./page/DetailPage"
 import Comparision from "./page/comparisionPage"
 import WatchlistPage from "./page/WatchlistPage"
 
+import { Analytics } from '@vercel/analytics/react';
+
 function App() {
   return (
+    <>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -16,6 +19,9 @@ function App() {
         <Route path="/compare/:coin1Id/:coin2Id" element={<Comparision />} />
       </Routes>
     </ThemeProvider>
+    <Analytics />
+    </>
+    
   )
 }
 
