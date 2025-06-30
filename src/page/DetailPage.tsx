@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { axiosInstance } from "../lib/axios";
-import type { detailCoin } from "../types/detailCoin";
 import Navbar from "../components/navbar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -16,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ChartAreaInteractive } from "../components/AreaChart";
 import { Badge } from "@/components/ui/badge";
+import { useCoinStore } from "@/store/useCoinStore";
 
 
 function RankBadge({ rank }: { rank: number }) {
@@ -31,9 +30,25 @@ function RankBadge({ rank }: { rank: number }) {
 
 const CoinDetail: React.FC = () => {
   const { id } = useParams();
-  const [coin, setCoin] = useState<detailCoin | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+
+
+const coins = useCoinStore((state) => state.coins);
+const fetchCoins = useCoinStore((state) => state.fetchCoins);
+
+  
+// Refetch coins on refresh if store is empty
+useEffect(() => {
+  if (coins.length === 0) {
+    setLoading(true);
+    fetchCoins().finally(() => setLoading(false));
+  }
+}, [coins.length, fetchCoins]);
+
+const coin = useCoinStore((state) =>
+  state.coins.find((coin) => coin.id === id)
+);
 
 
     // Check if coin is already bookmarked
@@ -44,31 +59,6 @@ const CoinDetail: React.FC = () => {
       setBookmarked(bookmarks.includes(id!));
     }
   }, [id]);
-
-  useEffect(() => {
-    const fetchCoin = async () => {
-      try {
-        const res = await axiosInstance.get(`/coins/${id}`, {
-          params: {
-            localization: false,
-            tickers: false,
-            market_data: true,
-            community_data: false,
-            developer_data: false,
-            sparkline: false,
-          },
-        });
-        setCoin(res.data as detailCoin);
-      } catch (err) {
-        console.error("Failed to fetch coin:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCoin();
-  }, [id]);
-
 
 
   const toggleBookmark = () => {
@@ -111,7 +101,7 @@ const CoinDetail: React.FC = () => {
 
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <img src={coin.image.large} alt={coin.name} className="w-10 h-10" />
+            <img src={coin.image} alt={coin.name} className="w-10 h-10" />
             <h1 className="text-2xl font-semibold">
               {coin.name} ({coin.symbol.toUpperCase()})
             </h1>
@@ -140,20 +130,20 @@ const CoinDetail: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
 
-          <p className="mb-2 text-gray-500">7D</p>
+          <p className="mb-2 text-gray-500">24h</p>
           <p className="text-xl font-bold mb-2">
-            ${coin.market_data.current_price.usd.toLocaleString()}
+            ${coin.current_price.toLocaleString()}
           </p>
           <div className="flex  items-center gap-2">
-            <p className="text-sm text-gray-500">Last 7 Days</p>
+            <p className="text-sm text-gray-500">Last 24h</p>
             <p
               className={`text-base  ${
-                coin.market_data.price_change_percentage_7d < 0
+                coin.price_change_percentage_24h < 0
                   ? "text-red-500"
                   : "text-green-500"
               }`}
             >
-              {coin.market_data.price_change_percentage_7d}
+              {coin.price_change_percentage_24h}
             </p>
           </div>
           </div>
@@ -177,59 +167,59 @@ const CoinDetail: React.FC = () => {
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Market Cap</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.market_cap.usd.toLocaleString()}
+              ${coin.market_cap.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Total Volume</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.total_volume.usd.toLocaleString()}
+              ${coin.total_volume.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Total Supply</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.total_supply.toLocaleString()}
+              ${coin.total_supply.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Circulating Supply</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.circulating_supply.toLocaleString()}
+              ${coin.circulating_supply.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Max Supply</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.max_supply?.toLocaleString()}
+              ${coin.max_supply?.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">Fully Diluted Valuation</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.fully_diluted_valuation.usd.toLocaleString()}
+              ${coin.fully_diluted_valuation.toLocaleString()}
             </p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">All-Time High</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.ath.usd.toLocaleString()}
+              ${coin.ath.toLocaleString()}
             </p>
-              <p className="text-sm text-gray-400">{coin.market_data.ath_date.usd.split("T")[0]}</p>
+              <p className="text-sm text-gray-400">{coin.ath_date.split("T")[0]}</p>
           </div>
 
           <div className="p-4 rounded-xl border shadow-sm">
             <h2 className="text-sm text-muted-foreground">All-Time Low</h2>
             <p className="text-xl font-bold">
-              ${coin.market_data.atl.usd.toLocaleString()}
+              ${coin.atl.toLocaleString()}
             </p>
-            <p className="text-sm text-gray-400">{coin.market_data.atl_date.usd.split("T")[0]}</p>
+            <p className="text-sm text-gray-400">{coin.atl_date.split("T")[0]}</p>
           </div>
 
         </div>

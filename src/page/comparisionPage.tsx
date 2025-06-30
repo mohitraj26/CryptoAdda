@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
-import { axiosInstance } from "../lib/axios";
 import { ChartLineDefault } from "../components/lineChart";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+import { useCoinStore } from "@/store/useCoinStore";
 
 // Skeleton component for loading state
 const TableRowSkeleton = () => (
@@ -37,46 +37,24 @@ const TableRowSkeleton = () => (
 
 const Comparision: React.FC = () => {
   const { coin1Id, coin2Id } = useParams();
-  const [coin1, setCoin1] = useState<any>(null);
-  const [coin2, setCoin2] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchCoins = async () => {
-      try {
-        const [res1, res2] = await Promise.all([
-          axiosInstance.get(`/coins/${coin1Id}`, {
-            params: {
-              localization: false,
-              tickers: false,
-              market_data: true,
-              community_data: false,
-              developer_data: false,
-              sparkline: false,
-            },
-          }),
-          axiosInstance.get(`/coins/${coin2Id}`, {
-            params: {
-              localization: false,
-              tickers: false,
-              market_data: true,
-              community_data: false,
-              developer_data: false,
-              sparkline: false,
-            },
-          }),
-        ]);
-        setCoin1(res1.data);
-        setCoin2(res2.data);
-      } catch (err) {
-        console.error("Failed to fetch coin data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchCoins = useCoinStore((state) => state.fetchCoins);
+const coinStoreCoins = useCoinStore((state) => state.coins);
+  
+useEffect(() => {
+  if (coinStoreCoins.length === 0) {
+    setLoading(true);
+    fetchCoins().finally(() => setLoading(false));
+  }
+}, [coinStoreCoins.length, fetchCoins]);
 
-    fetchCoins();
-  }, [coin1Id, coin2Id]);
+const coin1 = useCoinStore((state) =>
+  state.coins.find((coin) => coin.id === coin1Id)
+);
+const coin2 = useCoinStore((state) =>
+  state.coins.find((coin) => coin.id === coin2Id)
+);
 
   if (loading)
     return (
@@ -139,7 +117,7 @@ const Comparision: React.FC = () => {
               <TableRow key={coin.id}>
                 <TableCell className="py-4 px-3 sm:px-6 flex items-center gap-2 whitespace-nowrap">
                   <img
-                    src={coin.image.small}
+                    src={coin.image}
                     alt={coin.name}
                     className="w-6 h-6 rounded-full"
                     loading="lazy"
@@ -147,31 +125,31 @@ const Comparision: React.FC = () => {
                   {coin.name}
                 </TableCell>
                 <TableCell className="py-4 px-3 sm:px-6">
-                  ${coin.market_data.current_price.usd.toLocaleString()}
+                  ${coin.current_price.toLocaleString()}
                 </TableCell>
                 <TableCell
                   className={`py-4 px-3 sm:px-6 ${
-                    coin.market_data.price_change_percentage_24h < 0
+                    coin.price_change_percentage_24h < 0
                       ? "text-red-600"
                       : "text-green-600"
                   }`}
                 >
-                  {coin.market_data.price_change_percentage_24h.toFixed(2)}%
+                  {coin.price_change_percentage_24h.toFixed(2)}%
                 </TableCell>
                 <TableCell className="py-4 px-3 sm:px-6">
-                  ${coin.market_data.market_cap.usd.toLocaleString()}
+                  ${coin.market_cap.toLocaleString()}
                 </TableCell>
                 <TableCell className="py-4 px-3 sm:px-6">
-                  ${coin.market_data.total_volume.usd.toLocaleString()}
+                  ${coin.total_volume.toLocaleString()}
                 </TableCell>
                 <TableCell className="py-4 px-3 sm:px-6 whitespace-nowrap">
-                  {coin.market_data.circulating_supply
-                    ? coin.market_data.circulating_supply.toLocaleString()
+                  {coin.circulating_supply
+                    ? coin.circulating_supply.toLocaleString()
                     : "N/A"}
                 </TableCell>
                 <TableCell className="py-4 px-3 sm:px-6 whitespace-nowrap">
-                  {coin.market_data.total_supply
-                    ? coin.market_data.total_supply.toLocaleString()
+                  {coin.total_supply
+                    ? coin.total_supply.toLocaleString()
                     : "N/A"}
                 </TableCell>
               </TableRow>
@@ -189,7 +167,7 @@ const Comparision: React.FC = () => {
             >
               <div className="flex items-center gap-4 mb-3">
                 <img
-                  src={coin.image.large}
+                  src={coin.image}
                   alt={coin.name}
                   className="w-12 h-12 rounded-full"
                   loading="lazy"
@@ -201,17 +179,17 @@ const Comparision: React.FC = () => {
               <div className="text-center">
                 
                 <p className="text-2xl font-bold mb-2">
-                  ${coin.market_data.current_price.usd.toLocaleString()}
+                  ${coin.current_price.toLocaleString()}
                 </p>
                 <p
                   className={`text-lg font-semibold ${
-                    coin.market_data.price_change_percentage_7d < 0
+                    coin.price_change_percentage_24h < 0
                       ? "text-red-600"
                       : "text-green-600"
                   }`}
                 >
-                  <span className="text-gray-500 mb-1 block">Past 7 Days</span>
-                  {coin.market_data.price_change_percentage_7d.toFixed(2)}%
+                  <span className="text-gray-500 mb-1 block">Last 24h</span>
+                  {coin.price_change_percentage_24h.toFixed(2)}%
                 </p>
               </div>
             </div>
